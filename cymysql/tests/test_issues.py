@@ -294,7 +294,19 @@ class TestGitHubIssues(base.PyMySQLTestCase):
         finally:
             c.execute("drop table issue66")
 
-__all__ = ["TestOldIssues", "TestNewIssues", "TestGitHubIssues"]
+class TestCyMySQLIssues(base.PyMySQLTestCase):
+    def test_issue_13(self):
+        conn = self.connections[0]
+        c = conn.cursor()
+        self.assertEqual(0, conn.insert_id())
+        try:
+            c.execute("create table cy_issue13 (id integer primary key auto_increment, b mediumblob)")
+            c.execute("insert into cy_issue13(b) values (%s)", [b'x' * 16777215])
+            self.assertEqual(1, conn.insert_id())
+        finally:
+            c.execute("drop table cy_issue13")
+
+__all__ = ["TestOldIssues", "TestNewIssues", "TestGitHubIssues", "TestCyMySQLIssues"]
 
 if __name__ == "__main__":
     import unittest

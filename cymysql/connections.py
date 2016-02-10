@@ -125,7 +125,7 @@ class Connection(object):
                  read_default_file=None, use_unicode=None,
                  client_flag=0, cursorclass=Cursor, init_command=None,
                  connect_timeout=None, ssl=None, read_default_group=None,
-                 compress=None, named_pipe=None,
+                 compress=None, named_pipe=None, max_allowed_packet=16000000,
                  conv=decoders, encoders=encoders):
         """
         Establish a connection to the MySQL database. Accepts several
@@ -150,6 +150,7 @@ class Connection(object):
         read_default_group: Group to read from in the configuration file.
         compress; Not supported
         named_pipe: Not supported
+        max_allowed_packet: Max size of packet sent to server in bytes. (default: 16MB)
         """
 
         if use_unicode is None and sys.version_info[0] > 2:
@@ -220,6 +221,7 @@ class Connection(object):
         self.password = passwd
         self.db = db
         self.unix_socket = unix_socket
+        self.max_allowed_packet = max_allowed_packet
         self.conv = conv
         self.encoders = encoders
         if charset:
@@ -432,9 +434,21 @@ class Connection(object):
             (not PYTHON3 and  isinstance(sql, unicode))):
             sql = sql.encode(self.charset)
 
-        prelude = struct.pack('<i', len(sql)+1) + int2byte(command)
-        self.socket.sendall(prelude + sql)
-        if DEBUG: dump_packet(prelude + sql)
+        # +1 is for command
+        chunk_size = min(self.max_allowed_packet, len(sql) + 1)
+
+        prelude = struct.pack('<i', chunk_size) + int2byte(command)
+        packet = prelude + sql[:chunk_size-1]
+        sql = sql[chunk_size-1:]
+        self.socket.sendall(packet)
+        next_seq_id = 1
+        while len(sql):
+            chunk_size = min(self.max_allowed_packet, len(sql))
+            payload = sql[:chunk_size]
+            sql = sql[chunk_size:]
+            data = pack_int24(len(payload)) + int2byte(next_seq_id) + payload
+            self.socket.sendall(data)
+            next_seq_id = (next_seq_id + 1) % 256
 
     def _execute_command(self, command, sql):
         self._send_command(command, sql)
