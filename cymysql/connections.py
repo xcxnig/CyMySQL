@@ -93,7 +93,7 @@ def _caching_sha2_password_scramble(password, nonce):
     return _xor(message1, message2)
 
 
-class Connection(object):
+class ConnectionBase(object):
     """
     Representation of a socket with a mysql server.
 
@@ -611,3 +611,7 @@ class Connection(object):
     InternalError = InternalError
     ProgrammingError = ProgrammingError
     NotSupportedError = NotSupportedError
+
+
+class Connection(ConnectionBase):
+    pass
