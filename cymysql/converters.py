@@ -358,7 +358,6 @@ if PYTHON3:
     encoders[bytes] = escape_bytes
 else:
     encoders[unicode] = escape_string
-    encoders[long] = escape_long
 
 try:
     import numpy as np
