@@ -1,14 +1,11 @@
 # Python implementation of the MySQL client-server protocol
 #   https://dev.mysql.com/doc/dev/mysql-server/latest/PAGE_PROTOCOL.html
 
-import sys
 import struct
-from cymysql.err import raise_mysql_exception, OperationalError
+from cymysql.err import raise_mysql_exception
 from cymysql.constants import SERVER_STATUS, FLAG
 from cymysql.converters import convert_characters, convert_json
 from cymysql.charset import charset_by_id, encoding_by_charset
-
-PYTHON3 = sys.version_info[0] > 2
 
 FIELD_TYPE_VAR_STRING = 253
 
@@ -21,25 +18,15 @@ SERVER_MORE_RESULTS_EXISTS = SERVER_STATUS.SERVER_MORE_RESULTS_EXISTS
 
 
 def unpack_uint16(n):
-    if PYTHON3:
-        return n[0] + (n[1] << 8)
-    else:
-        return ord(n[0]) + (ord(n[1]) << 8)
+    return n[0] + (n[1] << 8)
 
 
 def unpack_uint24(n):
-    if PYTHON3:
-        return n[0] + (n[1] << 8) + (n[2] << 16)
-    else:
-        return ord(n[0]) + (ord(n[1]) << 8) + (ord(n[2]) << 16)
+    return n[0] + (n[1] << 8) + (n[2] << 16)
 
 
 def unpack_uint32(n):
-    if PYTHON3:
-        return n[0] + (n[1] << 8) + (n[2] << 16) + (n[3] << 24)
-    else:
-        return ord(n[0]) + (ord(n[1]) << 8) + \
-            (ord(n[2]) << 16) + (ord(n[3]) << 24)
+    return n[0] + (n[1] << 8) + (n[2] << 16) + (n[3] << 24)
 
 
 def unpack_uint64(n):
@@ -51,13 +38,12 @@ class MysqlPacket(object):
     from the network socket, removes packet header and provides an interface
     for reading/parsing the packet results."""
 
-    def __init__(self, data, charset, encoding, use_unicode):
+    def __init__(self, data, charset, encoding):
         self._charset = charset
         self._encoding = encoding
-        self._use_unicode = use_unicode
         self.__position = 0
         self.__data = data
-        is_error = self.__data[0] == (0xff if PYTHON3 else b'\xff')
+        is_error = self.__data[0] == 0xff
         if is_error:
             self.__position += 1  # field_count == error (we already know that)
             unpack_uint16(self._read(2))    # errno
@@ -119,7 +105,7 @@ class MysqlPacket(object):
     def read_decode_data(self, fields, decoders):
         return tuple([
             None if value is None
-            else decoder(value, self._encoding, field, self._use_unicode)
+            else decoder(value, self._encoding, field)
             if decoder in (convert_characters, convert_json)
             else decoder(value)
             for value, field, decoder in [
@@ -129,13 +115,13 @@ class MysqlPacket(object):
         ])
 
     def is_ok_packet(self):
-        return self.__data[0] == (0 if PYTHON3 else b'\x00')
+        return self.__data[0] == 0
 
     def is_eof_packet(self):
-        return self.__data[0] == (0xfe if PYTHON3 else b'\xfe')
+        return self.__data[0] == 0xfe
 
     def is_eof_and_status(self):
-        if self.__data[0] != (0xfe if PYTHON3 else b'\xfe'):
+        if self.__data[0] != 0xfe:
             return False, 0, 0
         return True, unpack_uint16(self._read(2)), unpack_uint16(self._read(2))
 

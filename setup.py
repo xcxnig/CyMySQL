@@ -1,19 +1,7 @@
-from os.path import abspath, dirname, join
 import sys
 
 from setuptools import setup, Command, Extension
-
-versionpath = join(abspath(dirname(__file__)), 'cymysql', '__version__.py')
-cymysql_version = {}
-
-if sys.version_info[:2] == (2, 7):
-    execfile(versionpath, cymysql_version)  # noqa: F821 'execfile' Py3
-
-elif sys.version_info >= (3, 5):
-    exec(open(versionpath, 'r').read(), cymysql_version)
-
-else:
-    raise ImportError("CyMySQL requires Python 2.7 or 3.5+")
+import cymysql
 
 try:
     from Cython.Build import cythonize
@@ -54,18 +42,10 @@ class TestCommand(Command):
 
 cmdclass = {'test': TestCommand}
 
-version_tuple = cymysql_version['VERSION']
-
-if version_tuple[2] is not None:
-    version = "%d.%d.%s" % version_tuple
-else:
-    version = "%d.%d" % version_tuple[:2]
-
 classifiers = [
     'Development Status :: 4 - Beta',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
     'Programming Language :: Python :: 3',
     'Topic :: Database',
     'Topic :: Database :: Front-Ends',
@@ -74,7 +54,7 @@ classifiers = [
 
 setup(
     name="cymysql",
-    version=version,
+    version=cymysql.__version__,
     url='https://github.com/nakagami/CyMySQL/',
     classifiers=classifiers,
     keywords=['MySQL'],

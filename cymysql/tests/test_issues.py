@@ -1,24 +1,10 @@
+import sys
+import datetime
 import cymysql
 from cymysql.tests import base
 import unittest
 from time import sleep
 
-import sys
-import datetime
-
-
-PYTHON3 = sys.version_info[0] > 2
-if PYTHON3:
-    # suppress flake8 error
-    unicode = str
-
-
-def u(x):
-    if sys.version_info[0] < 3:
-        import codecs
-        return codecs.unicode_escape_decode(x)[0]
-    else:
-        return x
 
 
 class TestOldIssues(base.PyMySQLTestCase):
@@ -119,9 +105,9 @@ KEY (`station`,`dh`,`echeance`)) ENGINE=MyISAM DEFAULT CHARSET=latin1;""")
         c.execute("create table issue15 (t varchar(32))")
 
         try:
-            c.execute("insert into issue15 (t) values (%s)", (u('\xe4\xf6\xfc'),))
+            c.execute("insert into issue15 (t) values (%s)", ('\xe4\xf6\xfc',))
             c.execute("select t from issue15")
-            self.assertEqual(u('\xe4\xf6\xfc'), c.fetchone()[0])
+            self.assertEqual('\xe4\xf6\xfc', c.fetchone()[0])
         finally:
             c.execute("drop table issue15")
 
@@ -159,14 +145,6 @@ KEY (`station`,`dh`,`echeance`)) ENGINE=MyISAM DEFAULT CHARSET=latin1;""")
             c.execute("drop table issue17")
 
 
-def _uni(s, e):
-    # hack for py3
-    if sys.version_info[0] > 2:
-        return str(bytes(s, sys.getdefaultencoding()), e)
-    else:
-        return unicode(s, e)
-
-
 class TestNewIssues(base.PyMySQLTestCase):
     def test_issue_34(self):
         try:
@@ -187,12 +165,12 @@ class TestNewIssues(base.PyMySQLTestCase):
         )
         c = conn.cursor()
         try:
-            c.execute(_uni("create table hei\xc3\x9fe (name varchar(32))", "utf8"))
-            c.execute(_uni("insert into hei\xc3\x9fe (name) values ('Pi\xc3\xb1ata')", "utf8"))
-            c.execute(_uni("select name from hei\xc3\x9fe", "utf8"))
-            self.assertEqual(_uni("Pi\xc3\xb1ata", "utf8"), c.fetchone()[0])
+            c.execute("create table hei\xc3\x9fe (name varchar(32))")
+            c.execute("insert into hei\xc3\x9fe (name) values ('Pi\xc3\xb1ata')")
+            c.execute("select name from hei\xc3\x9fe")
+            self.assertEqual("Pi\xc3\xb1ata", c.fetchone()[0])
         finally:
-            c.execute(_uni("drop table hei\xc3\x9fe", "utf8"))
+            c.execute("drop table hei\xc3\x9fe")
 
     @unittest.skip("This test requires manual intervention")
     def test_issue_35(self):

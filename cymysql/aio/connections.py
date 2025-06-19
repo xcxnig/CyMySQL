@@ -161,7 +161,7 @@ class AsyncConnection(Connection):
     async def read_packet(self):
         """Read an entire "mysql packet" in its entirety from the network
         and return a MysqlPacket type that represents the results."""
-        return MysqlPacket(await self.socket.recv_packet(self.loop), self.charset, self.encoding, self.use_unicode)
+        return MysqlPacket(await self.socket.recv_packet(self.loop), self.charset, self.encoding)
 
     async def _request_authentication(self):
         if self.user is None:

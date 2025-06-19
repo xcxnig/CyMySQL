@@ -9,7 +9,7 @@ class PyMySQLTestCase(unittest.TestCase):
     test_passwd = os.environ.get("MYSQL_ROOT_PASSWORD", "")
     databases = [
         {"host": test_host, "user": "root",
-         "passwd": test_passwd, "db": "test_cymysql", "use_unicode": True},
+         "passwd": test_passwd, "db": "test_cymysql"},
         {"host": test_host, "user": "root", "passwd": test_passwd, "db": "test_cymysql2"}]
 
     def setUp(self):

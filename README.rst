@@ -9,7 +9,7 @@ This package contains a python MySQL client library.
 
 It is a fork project from PyMySQL https://pymysql.readthedocs.io/en/latest/.
 
-CyMySQL is accerarated by Cython and supports Python versions 2 and 3.
+CyMySQL is accerarated by Cython.
 
 Documentation on the MySQL client/server protocol can be found here:
 http://dev.mysql.com/doc/internals/en/client-server-protocol.html
@@ -17,7 +17,7 @@ http://dev.mysql.com/doc/internals/en/client-server-protocol.html
 Requirements
 -------------
 
-- Python 2.7, 3.5+
+- Python 3.10+
 - MySQL 5.7 or higher, MariaDB
 
 Installation
@@ -109,10 +109,7 @@ https://peps.python.org/pep-0249/
 asyncio
 ++++++++++++++++++++++++++++++++++++++
 
-In Python3, you can use asyncio to write the following.
-
-This API is experimental.
-If there are any mistakes, please correct them in the pull request and send.
+You can use asyncio to write the following.
 
 Use connect
 ::

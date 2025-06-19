@@ -43,15 +43,14 @@ cdef class MysqlPacket(object):
     """Representation of a MySQL response packet.  Reads in the packet
     from the network socket, removes packet header and provides an interface
     for reading/parsing the packet results."""
-    cdef object connection, _socket, _charset, _encoding, _use_unicode
+    cdef object connection, _socket, _charset, _encoding
     cdef bytes __data
     cdef int __position
 
-    def __init__(self, data, charset, encoding, use_unicode):
+    def __init__(self, data, charset, encoding):
         cdef int is_error
         self._charset = charset
         self._encoding = encoding
-        self._use_unicode = use_unicode
         self.__position = 0
         self.__data = data
         is_error = (<unsigned char>(self.__data[0])) == 0xff
@@ -117,7 +116,7 @@ cdef class MysqlPacket(object):
     cpdef read_decode_data(self, fields, decoders):
         return tuple([
             None if value is None
-            else decoder(value, self._encoding, field, self._use_unicode)
+            else decoder(value, self._encoding, field)
             if decoder in (convert_characters, convert_json)
             else decoder(value)
             for value, field, decoder in [

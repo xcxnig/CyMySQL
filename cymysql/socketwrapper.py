@@ -1,4 +1,3 @@
-import sys
 import zlib
 try:
     import pyzstd
@@ -6,21 +5,13 @@ except ImportError:
     pyzstd = None
 from cymysql.err import OperationalError
 
-PYTHON3 = sys.version_info[0] > 2
-
 
 def pack_int24(n):
-    if PYTHON3:
-        return bytes([n & 0xFF, (n >> 8) & 0xFF, (n >> 16) & 0xFF])
-    else:
-        return chr(n & 0xFF) + chr((n >> 8) & 0xFF) + chr((n >> 16) & 0xFF)
+    return bytes([n & 0xFF, (n >> 8) & 0xFF, (n >> 16) & 0xFF])
 
 
 def unpack_uint24(n):
-    if PYTHON3:
-        return n[0] + (n[1] << 8) + (n[2] << 16)
-    else:
-        return ord(n[0]) + (ord(n[1]) << 8) + (ord(n[2]) << 16)
+    return n[0] + (n[1] << 8) + (n[2] << 16)
 
 
 class SocketWrapper():

@@ -8,8 +8,6 @@ from cymysql.err import (
     NotSupportedError, ProgrammingError
 )
 
-PYTHON3 = sys.version_info[0] > 2
-
 
 class Cursor(object):
     '''
@@ -115,10 +113,8 @@ class Cursor(object):
         encoding = conn.encoding
         del self.messages[:]
 
-        if PYTHON3 and (not isinstance(query, str)):
+        if not isinstance(query, str):
             query = query.decode(encoding)
-        if (not PYTHON3) and isinstance(query, unicode):
-            query = query.encode(encoding)
 
         if args is not None:
             if isinstance(args, (tuple, list)):
@@ -187,20 +183,16 @@ class Cursor(object):
         conn = self._get_db()
         for index, arg in enumerate(args):
             q = "SET @_%s_%d=%s" % (procname, index, conn.escape(arg))
-            if PYTHON3 and (not isinstance(q, str)):
+            if not isinstance(q, str):
                 q = q.decode(conn.encoding)
-            if (not PYTHON3) and isinstance(q, unicode):
-                q = q.encode(conn.encoding)
             self._query(q)
             self.nextset()
 
         q = "CALL %s(%s)" % (procname,
                              ','.join(['@_%s_%d' % (procname, i)
                                        for i in range(len(args))]))
-        if PYTHON3 and (not isinstance(q, str)):
+        if not isinstance(q, str):
             q = q.decode(conn.encoding)
-        if (not PYTHON3) and isinstance(q, unicode):
-            q = q.encode(conn.encoding)
         self._query(q)
         self._executed = q
 

@@ -1,12 +1,9 @@
 import re
 import datetime
 import time
-import sys
 import decimal
 
 from cymysql.constants import FIELD_TYPE
-
-PYTHON3 = sys.version_info[0] > 2
 
 ESCAPE_REGEX = re.compile(r"[\0\n\r\032\'\"\\]")
 ESCAPE_MAP = {'\0': '\\0', '\n': '\\n', '\r': '\\r', '\032': '\\Z',
@@ -113,7 +110,7 @@ def convert_datetime(obj):
       True
 
     """
-    if PYTHON3 and not isinstance(obj, str):
+    if not isinstance(obj, str):
         obj = obj.decode('ascii')
     if ' ' in obj:
         sep = ' '
@@ -150,7 +147,7 @@ def convert_timedelta(obj):
     can accept values as (+|-)DD HH:MM:SS. The latter format will not
     be parsed correctly by this function.
     """
-    if PYTHON3 and not isinstance(obj, str):
+    if not isinstance(obj, str):
         obj = obj.decode('ascii')
     try:
         microseconds = 0
@@ -216,7 +213,7 @@ def convert_date(obj):
       True
 
     """
-    if PYTHON3 and not isinstance(obj, str):
+    if not isinstance(obj, str):
         obj = obj.decode('ascii')
     try:
         return datetime.date(*[int(x) for x in obj.split('-', 2)])
@@ -245,7 +242,7 @@ def convert_mysql_timestamp(obj):
       True
 
     """
-    if PYTHON3 and not isinstance(obj, str):
+    if not isinstance(obj, str):
         obj = obj.decode('ascii')
     if obj[4] == '-':
         return convert_datetime(obj)
@@ -273,35 +270,29 @@ def convert_bit(b):
     return b
 
 
-def convert_characters(data, encoding=None, field=None, use_unicode=None):
+def convert_characters(data, encoding=None, field=None):
     if field.is_set:
         return convert_set(data.decode(field.encoding))
     if field.is_binary:
-        if PYTHON3 and field.charset != 'binary':
+        if field.charset != 'binary':
             return data.decode(field.encoding)
         else:
             return data
 
-    if use_unicode or PYTHON3:
-        return data.decode(field.encoding)
-    elif encoding != field.encoding:
-        return data.decode(field.encoding).encode(encoding)
-    return data
+    return data.decode(field.encoding)
 
 
-def convert_vector(data, encoding=None, field=None, use_unicode=None):
+def convert_vector(data, encoding=None, field=None):
     import numpy as np
     return np.frombuffer(data, dtype=np.float32)
 
 
-def convert_json(data, encoding=None, field=None, use_unicode=None):
-    if use_unicode or PYTHON3:
-        return data.decode(encoding)
-    return data
+def convert_json(data, encoding=None, field=None):
+    return data.decode(encoding)
 
 
 def convert_decimal(obj):
-    if PYTHON3 and not isinstance(obj, str):
+    if not isinstance(obj, str):
         obj = obj.decode('ascii')
     return decimal.Decimal(obj)
 
@@ -337,6 +328,7 @@ decoders = {
 }
 
 encoders = {
+        bytes:escape_bytes,
         bool: escape_bool,
         int: escape_int,
         float: escape_float,
@@ -353,11 +345,6 @@ encoders = {
         datetime.time: escape_time,
         time.struct_time: escape_struct_time,
 }
-
-if PYTHON3:
-    encoders[bytes] = escape_bytes
-else:
-    encoders[unicode] = escape_string
 
 try:
     import numpy as np
