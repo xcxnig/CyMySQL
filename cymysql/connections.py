@@ -25,8 +25,6 @@ from cymysql.packet import MysqlPacket
 from cymysql.result import MySQLResult
 from cymysql.socketwrapper import SocketWrapper
 
-PYTHON3 = sys.version_info[0] > 2
-
 DEFAULT_USER = getpass.getuser()
 DEFAULT_CHARSET = 'utf8mb4'
 
@@ -47,17 +45,11 @@ def byte2int(b):
 
 
 def int2byte(i):
-    if PYTHON3:
-        return bytes([i])
-    else:
-        return chr(i)
+    return bytes([i])
 
 
 def pack_int24(n):
-    if PYTHON3:
-        return bytes([n & 0xFF, (n >> 8) & 0xFF, (n >> 16) & 0xFF])
-    else:
-        return chr(n & 0xFF) + chr((n >> 8) & 0xFF) + chr((n >> 16) & 0xFF)
+    return bytes([n & 0xFF, (n >> 8) & 0xFF, (n >> 16) & 0xFF])
 
 
 SCRAMBLE_LENGTH = 20
@@ -451,10 +443,7 @@ class Connection(object):
         if not self.socket:
             self.errorhandler(None, InterfaceError, (-1, 'socket not found'))
 
-        if (
-            (PYTHON3 and isinstance(sql, str)) or
-            (not PYTHON3 and isinstance(sql, unicode))
-        ):
+        if isinstance(sql, str):
             sql = sql.encode(self.encoding)
 
         if len(sql) + 1 > 0xffffff:
@@ -525,7 +514,7 @@ class Connection(object):
         self.socket.send_uncompress_packet(data)
         auth_packet = self.socket.recv_uncompress_packet()
 
-        if auth_packet[0] == (0xfe if PYTHON3 else b'\xfe'):  # EOF packet
+        if auth_packet[0] == 0xfe:  # EOF packet
             # AuthSwitchRequest
             # https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::AuthSwitchRequest
             i = auth_packet.find(b'\0', 1)

@@ -2,13 +2,8 @@ import struct
 import sys
 from cymysql.constants import ER
 
-PYTHON3 = sys.version_info[0] > 2
 
-if PYTHON3:
-    StandardError = Exception
-
-
-class MySQLError(StandardError):
+class MySQLError(Exception):
 
     """Exception related to operation with MySQL."""
     def __init__(self, *args):
@@ -21,7 +16,7 @@ class MySQLError(StandardError):
         super(MySQLError, self).__init__(*args)
 
 
-class Warning(MySQLError):
+class Warning(Warning, MySQLError):
 
     """Exception raised for important warnings like data truncations
     while inserting, etc."""
