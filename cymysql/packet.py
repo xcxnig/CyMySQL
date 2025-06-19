@@ -38,10 +38,9 @@ class MysqlPacket(object):
     from the network socket, removes packet header and provides an interface
     for reading/parsing the packet results."""
 
-    def __init__(self, data, charset, encoding, use_unicode):
+    def __init__(self, data, charset, encoding):
         self._charset = charset
         self._encoding = encoding
-        self._use_unicode = use_unicode
         self.__position = 0
         self.__data = data
         is_error = self.__data[0] == 0xff
@@ -106,7 +105,7 @@ class MysqlPacket(object):
     def read_decode_data(self, fields, decoders):
         return tuple([
             None if value is None
-            else decoder(value, self._encoding, field, self._use_unicode)
+            else decoder(value, self._encoding, field)
             if decoder in (convert_characters, convert_json)
             else decoder(value)
             for value, field, decoder in [

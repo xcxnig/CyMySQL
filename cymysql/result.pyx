@@ -34,7 +34,6 @@ cdef class MySQLResult(object):
             self.connection.socket.recv_packet(),
             self.connection.charset,
             self.connection.encoding,
-            self.connection.use_unicode,
         )
 
         if self.first_packet.is_ok_packet():
@@ -60,7 +59,6 @@ cdef class MySQLResult(object):
                 self.connection.socket.recv_packet(),
                 self.connection.charset,
                 self.connection.encoding,
-                self.connection.use_unicode,
             )
             is_eof, warning_count, server_status = packet.is_eof_and_status()
             if is_eof:
@@ -83,7 +81,6 @@ cdef class MySQLResult(object):
                 self.connection.socket.recv_packet(),
                 self.connection.charset,
                 self.connection.encoding,
-                self.connection.use_unicode,
             )
             self.fields.append(field)
             description.append(field.description())
@@ -92,7 +89,6 @@ cdef class MySQLResult(object):
             self.connection.socket.recv_packet(),
             self.connection.charset,
             self.connection.encoding,
-            self.connection.use_unicode,
         )
         assert eof_packet.is_eof_packet(), 'Protocol error, expecting EOF'
         self.description = tuple(description)
@@ -106,7 +102,6 @@ cdef class MySQLResult(object):
                 self.connection.socket.recv_packet(),
                 self.connection.charset,
                 self.connection.encoding,
-                self.connection.use_unicode,
             )
             is_eof, warning_count, server_status = packet.is_eof_and_status()
             if is_eof:

@@ -270,7 +270,7 @@ def convert_bit(b):
     return b
 
 
-def convert_characters(data, encoding=None, field=None, use_unicode=None):
+def convert_characters(data, encoding=None, field=None):
     if field.is_set:
         return convert_set(data.decode(field.encoding))
     if field.is_binary:
@@ -282,12 +282,12 @@ def convert_characters(data, encoding=None, field=None, use_unicode=None):
     return data.decode(field.encoding)
 
 
-def convert_vector(data, encoding=None, field=None, use_unicode=None):
+def convert_vector(data, encoding=None, field=None):
     import numpy as np
     return np.frombuffer(data, dtype=np.float32)
 
 
-def convert_json(data, encoding=None, field=None, use_unicode=None):
+def convert_json(data, encoding=None, field=None):
     return data.decode(encoding)
 
 

@@ -114,7 +114,7 @@ class Connection(object):
     def __init__(self, host="localhost", user=None, passwd="",
                  db=None, port=3306, unix_socket=None,
                  charset='', sql_mode=None,
-                 read_default_file=None, use_unicode=None,
+                 read_default_file=None,
                  client_flag=0, cursorclass=None, init_command=None,
                  connect_timeout=None, ssl=None, read_default_group=None,
                  compress="", zstd_compression_level=3, named_pipe=None,
@@ -133,7 +133,6 @@ class Connection(object):
         sql_mode: Default SQL_MODE to use.
         read_default_file: Specifies  my.cnf file to read these parameters from under the [client] section.
         conv: Decoders dictionary to use instead of the default one. This is used to provide custom marshalling of types. See converters.
-        use_unicode: Whether or not to default to unicode strings. This option defaults to true for Py3k.
         client_flag: Custom flags to send to MySQL. Find potential values in constants.CLIENT.
         cursorclass: Custom cursor class to use.
         init_command: Initial SQL statement to run when connection is established.
@@ -144,10 +143,6 @@ class Connection(object):
         zstd_compression_level: zstd compression leve (1-22), default is 3.
         named_pipe: Not supported
         """
-
-        if use_unicode is None and sys.version_info[0] > 2:
-            use_unicode = True
-
         if named_pipe:
             raise NotImplementedError("named_pipe argument are not supported")
 
@@ -222,16 +217,7 @@ class Connection(object):
         self.unix_socket = unix_socket
         self.conv = conv
         self.encoders = encoders
-        if charset:
-            self.charset = charset
-            self.use_unicode = True
-        else:
-            self.charset = DEFAULT_CHARSET
-            self.use_unicode = False
-
-        if use_unicode is not None:
-            self.use_unicode = use_unicode
-
+        self.charset = charset if charset else DEFAULT_CHARSET
         self.encoding = encoding_by_charset(self.charset)
 
         client_flag |= CLIENT.CAPABILITIES
@@ -431,7 +417,7 @@ class Connection(object):
     def read_packet(self):
         """Read an entire "mysql packet" in its entirety from the network
         and return a MysqlPacket type that represents the results."""
-        return MysqlPacket(self.socket.recv_packet(), self.charset, self.encoding, self.use_unicode)
+        return MysqlPacket(self.socket.recv_packet(), self.charset, self.encoding)
 
     def insert_id(self):
         if self._result:
