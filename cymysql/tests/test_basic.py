@@ -4,16 +4,7 @@ from cymysql.tests import base
 import time
 import datetime
 import struct
-import sys
 import unittest
-
-
-def u(x):
-    if sys.version_info[0] < 3:
-        import codecs
-        return codecs.unicode_escape_decode(x)[0]
-    else:
-        return x
 
 
 def int2byte(i):
@@ -50,7 +41,7 @@ class TestConversion(base.PyMySQLTestCase):
                 123456789012,
                 5.7,
                 "hello'\" world",
-                u"Espa\xc3\xb1ol",
+                "Espa\xc3\xb1ol",
                 "binary\x00data".encode(conn.encoding),
                 datetime.date(1988, 2, 2),
                 datetime.datetime(2014, 5, 15, 7, 45, 57),
@@ -158,9 +149,9 @@ class TestConversion(base.PyMySQLTestCase):
         conn = self.connections[0]
         c = conn.cursor()
         c.execute("select null,''")
-        self.assertEqual((None, u('')), c.fetchone())
+        self.assertEqual((None, ''), c.fetchone())
         c.execute("select '',null")
-        self.assertEqual((u(''), None), c.fetchone())
+        self.assertEqual(('', None), c.fetchone())
 
     def test_datetime(self):
         """ test conversion of null, empty string """
@@ -194,7 +185,7 @@ class TestConversion(base.PyMySQLTestCase):
         c.callproc('test_proc', ('Foo', ))
         r = c.fetchall()
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0], (u'foo', ))
+        self.assertEqual(r[0], ('foo', ))
 
 
 class TestCursor(base.PyMySQLTestCase):
