@@ -1,7 +1,6 @@
 import sys
 
-from setuptools import setup, Command, Extension
-import cymysql
+from setuptools import setup, Extension
 
 try:
     from Cython.Build import cythonize
@@ -21,51 +20,6 @@ try:
 except ImportError:
     ext_modules = None
 
-
-class TestCommand(Command):
-    user_options = []
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        '''
-        Finds all the tests modules in tests/, and runs them.
-        '''
-        from cymysql import tests
-        import unittest
-        unittest.main(tests, argv=sys.argv[:1])
-
-
-cmdclass = {'test': TestCommand}
-
-classifiers = [
-    'Development Status :: 4 - Beta',
-    'Operating System :: OS Independent',
-    'Programming Language :: Python',
-    'Programming Language :: Python :: 3',
-    'Topic :: Database',
-    'Topic :: Database :: Front-Ends',
-    'Topic :: Software Development :: Libraries :: Python Modules',
-]
-
 setup(
-    name="cymysql",
-    version=cymysql.__version__,
-    url='https://github.com/nakagami/CyMySQL/',
-    classifiers=classifiers,
-    keywords=['MySQL'],
-    author='Yutaka Matsubara',
-    author_email='yutaka.matsubara@gmail.com',
-    maintainer='Hajime Nakagami',
-    maintainer_email='nakagami@gmail.com',
-    description='Python MySQL Driver using Cython',
-    long_description=open('README.rst').read(),
-    license="MIT",
-    packages=['cymysql', 'cymysql.aio', 'cymysql.constants', 'cymysql.tests'],
-    cmdclass=cmdclass,
     ext_modules=ext_modules,
 )

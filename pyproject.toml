@@ -1,24 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0", "cython"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "CyMySQL"
 description = "Python MySQL Driver using Cython"
+readme = "README.rst"
+keywords = ["MySQL"]
 authors = [
-    {name = "Yutaka Matsubara", email = "yutaka.matsubara@gmail.com"}
+    { name = "Yutaka Matsubara", email = "yutaka.matsubara@gmail.com" }
 ]
 maintainers = [
-    {name = "Hajime Nakagami", email = "nakagami@gmail.com"}
+    { name = "Hajime Nakagami", email = "nakagami@gmail.com" }
 ]
 dependencies = []
-
-readme = "README.rst"
-license = {text = "MIT License"}
-keywords = ["MySQL"]
-
 classifiers = [
     'Development Status :: 4 - Beta',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'License :: OSI Approved :: MIT License',
     'Topic :: Database',
     'Topic :: Database :: Front-Ends',
     'Topic :: Software Development :: Libraries :: Python Modules',
@@ -26,11 +26,11 @@ classifiers = [
 dynamic = ["version"]
 
 [project.urls]
-"Project" = "https://github.com/nakagami/CyMySQL"
-
-[build-system]
-requires = ["setuptools", "Cython"]
-build-backend = "setuptools.build_meta"
+"Project" = "https://github.com/nakagami/CyMySQL/"
 
 [tool.setuptools.dynamic]
 version = {attr = "cymysql.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["cymysql*"]

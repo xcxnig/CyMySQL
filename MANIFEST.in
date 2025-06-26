@@ -1,2 +1,3 @@
 include README.rst LICENSE
 recursive-include cymysql *.pyx *.pxd
+global-exclude *.c
