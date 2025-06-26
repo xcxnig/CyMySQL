@@ -39,9 +39,9 @@ jobs:
         python -m pip install setuptools
         python -m pip install --upgrade pip
         python -m pip install flake8
+        pytohn -m pip install pytest
     - name: Test
       run: |
-        MYSQL_ROOT_PASSWORD=password python setup.py test
-        python -m pip install cython
-        python setup.py build_ext -i
-        MYSQL_ROOT_PASSWORD=password python setup.py test
+        MYSQL_ROOT_PASSWORD=password pytest
+        python -m pip install -e .
+        MYSQL_ROOT_PASSWORD=password pytest
