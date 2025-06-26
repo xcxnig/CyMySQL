@@ -23,71 +23,17 @@ Requirements
 Installation
 --------------
 
-Install Cython (optional)
-+++++++++++++++++++++++++
-
-Installation of Cython is optional.
-CyMySQL will run faster if installed, but will also run without it.
-
-Since the bottleneck is often in MySQL queries, installing Cython may not be effective in many cases.
-
-For most versions of pip and setuptools installation of Cython is not
-required as it's listed in pyproject.tompl as a required build-time
-dependency and will be installed automatically in the isolated build
-environemnt. This means it's not possible to install CyMySQL in
-pure-Python mode without cythonized extensions.
-
-For older versions of pip and setuptools that don't obey pyproject.tompl
-install Cython yourself:
+With cythonize
 
 ::
 
-   # pip install cython
+   $ pip install cymysql
 
-Install cymysql
-++++++++++++++++++++++++++++++
-
-::
-
-   # pip install cymysql
-
-Install pycryptodome(depending on a situation)
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Or without cythonize
 
 ::
 
-   # pip install pycryptodome
-
-If you use caching_sha2_password authentication plugin and connect with 'not ssl and not unix_socket',
-it means that if the following error occur ...
-
-::
-
-   ModuleNotFoundError: No module named 'Crypto'
-
-you shoud install pycryptodome.
-
-Install pyzstd (compress="zstd")
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-::
-
-   # pip install pyzstd
-
-connect() has a `compress` parameter, and it can be set either "zlib" or "zstd".
-
-If "zstd" is specified, `pyzstd` must be installed.
-
-Install numpy (VECTOR type)
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-::
-
-   # pip install numpy
-
-If you fetch a VECTOR type (MySQL 9.0), you can get the result in ndarray.
-
-The value type returned by the VECTOR type may change in future versions of CyMySQL.
+   $ NO_CYTHON=1 pip instal cymysql
 
 Example
 ---------------

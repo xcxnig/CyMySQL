@@ -13,7 +13,7 @@ authors = [
 maintainers = [
     { name = "Hajime Nakagami", email = "nakagami@gmail.com" }
 ]
-dependencies = []
+dependencies = ["pycryptodome", "pyzstd"]
 classifiers = [
     'Development Status :: 4 - Beta',
     'Operating System :: OS Independent',
@@ -24,6 +24,11 @@ classifiers = [
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
 dynamic = ["version"]
+
+[project.optional-dependencies]
+"vector" = [
+    "numpy"
+]
 
 [project.urls]
 "Project" = "https://github.com/nakagami/CyMySQL/"
