@@ -139,7 +139,7 @@ class Connection(object):
         connect_timeout: Timeout before throwing an exception when connecting.
         ssl: A dict of arguments similar to mysql_ssl_set()'s parameters. For now the capath and cipher arguments are not supported.
         read_default_group: Group to read from in the configuration file.
-        compress: Compression algorithm.
+        compress: Compression algorithm ("zlib" or "zstd").
         zstd_compression_level: zstd compression leve (1-22), default is 3.
         named_pipe: Not supported
         """
