@@ -80,7 +80,7 @@ class MysqlPacket(object):
         """
         c = ord(self._read(1))
         if c == UNSIGNED_CHAR_COLUMN:
-            return -1
+            return None
         elif c == UNSIGNED_SHORT_COLUMN:
             return unpack_uint16(self._read(2))
         elif c == UNSIGNED_INT24_COLUMN:
@@ -98,7 +98,7 @@ class MysqlPacket(object):
         that many bytes of binary data.  (For example "cat" would be "3cat".)
         """
         length = self.read_length_coded_binary()
-        if length < 0:
+        if length is None:
             return None
         return self._read(length)
 
