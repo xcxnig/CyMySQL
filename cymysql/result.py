@@ -1,6 +1,6 @@
 from cymysql.packet import MysqlPacket, FieldDescriptorPacket
 
-from cymysql.constants import SERVER_STATUS, FLAG
+from cymysql.constants import SERVER_STATUS
 
 
 SERVER_MORE_RESULTS_EXISTS = SERVER_STATUS.SERVER_MORE_RESULTS_EXISTS
