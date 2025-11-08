@@ -44,7 +44,7 @@ def byte2int(b):
         return ord(b)
 
 
-def int2byte(i):
+def int2bytes(i):
     return bytes([i])
 
 
@@ -260,7 +260,7 @@ class Connection(object):
         ''' Send the quit message and close the socket '''
         if self.socket is None:
             return
-        send_data = b'\x01\x00\x00\x00' + int2byte(COMMAND.COM_QUIT)
+        send_data = b'\x01\x00\x00\x00' + int2bytes(COMMAND.COM_QUIT)
         self.socket.send_packet(send_data)
         self.socket.close()
         self.socket = None
@@ -434,7 +434,7 @@ class Connection(object):
 
         if len(sql) + 1 > 0xffffff:
             raise ValueError('Sending query packet is too large')
-        prelude = struct.pack('<i', len(sql)+1) + int2byte(command)
+        prelude = struct.pack('<i', len(sql)+1) + int2bytes(command)
         self.socket.send_packet(prelude + sql)
 
     def _scramble(self):
@@ -466,35 +466,35 @@ class Connection(object):
         data_init = (
             struct.pack('<i', self.client_flag) +
             struct.pack("<I", 1) +
-            int2byte(charset_id) + int2byte(0)*23
+            int2bytes(charset_id) + int2bytes(0)*23
         )
 
         if self.ssl and self.server_capabilities & CLIENT.SSL:
-            data = pack_int24(len(data_init)) + int2byte(next_packet) + data_init
+            data = pack_int24(len(data_init)) + int2bytes(next_packet) + data_init
             self.socket.send_uncompress_packet(data)
             next_packet += 1
             self.socket = ssl.wrap_socket(self.socket, keyfile=self.key,
                                           certfile=self.cert,
                                           ca_certs=self.ca)
 
-        data = data_init + user + int2byte(0)
+        data = data_init + user + int2bytes(0)
         authresp = self._scramble()
 
         if self.server_capabilities & CLIENT.SECURE_CONNECTION:
-            data += int2byte(len(authresp)) + authresp
+            data += int2bytes(len(authresp)) + authresp
         else:
-            data += authresp + int2byte(0)
+            data += authresp + int2bytes(0)
 
         if self.db and self.server_capabilities & CLIENT.CONNECT_WITH_DB:
-            data += self.db.encode(self.encoding) + int2byte(0)
+            data += self.db.encode(self.encoding) + int2bytes(0)
 
         if self.server_capabilities & CLIENT.PLUGIN_AUTH:
-            data += self.auth_plugin_name.encode(self.encoding) + int2byte(0)
+            data += self.auth_plugin_name.encode(self.encoding) + int2bytes(0)
 
         if self.server_capabilities & CLIENT.ZSTD_COMPRESSION_ALGORITHM:
-            data += int2byte(self.zstd_compression_level)
+            data += int2bytes(self.zstd_compression_level)
 
-        data = pack_int24(len(data)) + int2byte(next_packet) + data
+        data = pack_int24(len(data)) + int2bytes(next_packet) + data
         next_packet += 2
 
         self.socket.send_uncompress_packet(data)
@@ -508,7 +508,7 @@ class Connection(object):
             j = auth_packet.find(b'\0', i + 1)
             self.salt = auth_packet[i + 1:j]
             data = self._scramble()
-            data = pack_int24(len(data)) + int2byte(next_packet) + data
+            data = pack_int24(len(data)) + int2bytes(next_packet) + data
             next_packet += 2
             self.socket.send_uncompress_packet(data)
             auth_packet = self.socket.recv_uncompress_packet()
@@ -530,7 +530,7 @@ class Connection(object):
         else:
             # request_public_key
             data = b'\x02'
-            data = pack_int24(len(data)) + int2byte(next_packet) + data
+            data = pack_int24(len(data)) + int2bytes(next_packet) + data
             next_packet += 2
             self.socket.send_uncompress_packet(data)
             response = self.read_packet()
@@ -543,7 +543,7 @@ class Connection(object):
             password = self.password.encode(self.encoding) + b'\x00'
             data = cipher.encrypt(_xor(password, self.salt))
 
-        data = pack_int24(len(data)) + int2byte(next_packet) + data
+        data = pack_int24(len(data)) + int2bytes(next_packet) + data
         next_packet += 2
         self.socket.send_uncompress_packet(data)
 
@@ -569,7 +569,7 @@ class Connection(object):
 
         self.protocol_version = byte2int(data[i:i+1])
         i += 1
-        str_end = data.find(int2byte(0), i)
+        str_end = data.find(int2bytes(0), i)
         self.server_version = data[i:str_end].decode('utf-8')
         i = str_end + 1
         self.server_thread_id = struct.unpack('<I', data[i:i+4])
@@ -600,7 +600,7 @@ class Connection(object):
                 rest_salt_len = max(13, salt_len-8)
                 self.salt += data[i:i+rest_salt_len-1]
                 i += rest_salt_len
-            self.auth_plugin_name = data[i:data.find(int2byte(0), i)].decode('utf-8')
+            self.auth_plugin_name = data[i:data.find(int2bytes(0), i)].decode('utf-8')
 
     def get_transaction_status(self):
         return bool(self.server_status & SERVER_STATUS.SERVER_STATUS_IN_TRANS)
