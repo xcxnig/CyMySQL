@@ -117,7 +117,7 @@ class Connection(object):
                  read_default_file=None,
                  client_flag=0, cursorclass=None, init_command=None,
                  connect_timeout=None, ssl=None, read_default_group=None,
-                 compress="", zstd_compression_level=3, named_pipe=None,
+                 compression_algorithm="", zstd_compression_level=3, named_pipe=None,
                  conv=decoders, encoders=encoders):
         """
         Establish a connection to the MySQL database. Accepts several
@@ -139,7 +139,7 @@ class Connection(object):
         connect_timeout: Timeout before throwing an exception when connecting.
         ssl: A dict of arguments similar to mysql_ssl_set()'s parameters. For now the capath and cipher arguments are not supported.
         read_default_group: Group to read from in the configuration file.
-        compress: Compression algorithm ("zlib" or "zstd").
+        compression_algorithm: Compression algorithm ("zlib" or "zstd").
         zstd_compression_level: zstd compression leve (1-22), default is 3.
         named_pipe: Not supported
         """
@@ -149,10 +149,10 @@ class Connection(object):
         if ssl and ('capath' in ssl or 'cipher' in ssl):
             raise NotImplementedError('ssl options capath and cipher are not supported')
 
-        if compress and compress not in ("zlib", "zstd"):
-            raise NotImplementedError('compress argument can set zlib or zstd')
+        if compression_algorithm and compression_algorithm not in ("zlib", "zstd"):
+            raise NotImplementedError('compression_algorithm argument can set zlib or zstd')
 
-        self.compress = compress
+        self.compress = compression_algorithm
         self.zstd_compression_level = zstd_compression_level
         self.socket = None
         self.ssl = False
