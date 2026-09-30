@@ -262,6 +262,21 @@ class TestCursor(base.PyMySQLTestCase):
             pass
 
 
+class TestConnection(base.PyMySQLTestCase):
+    def test_autocommit(self):
+        conn = self.connections[0]
+        self.assertFalse(conn.get_autocommit())
+        conn.autocommit(True)
+        self.assertTrue(conn.get_autocommit())
+        conn.autocommit(False)
+        self.assertFalse(conn.get_autocommit())
+
+    def test_ping(self):
+        conn = self.connections[0]
+        self.assertTrue(conn.ping())
+        self.assertTrue(conn.ping(reconnect=False))
+
+
 class TestCharset(base.PyMySQLTestCase):
     def test_charset(self):
         conn = cymysql.connect(
@@ -274,7 +289,7 @@ class TestCharset(base.PyMySQLTestCase):
         conn.close()
 
 
-__all__ = ["TestConversion", "TestCursor", "TestCharset"]
+__all__ = ["TestConversion", "TestCursor", "TestConnection", "TestCharset"]
 
 if __name__ == "__main__":
     import unittest

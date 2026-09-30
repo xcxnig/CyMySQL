@@ -1,4 +1,5 @@
 import asyncio
+import socket
 import ssl
 import struct
 import sys
@@ -59,12 +60,16 @@ class AsyncConnection(Connection):
         if self.socket is None:
             return
         send_data = b'\x01\x00\x00\x00' + int2bytes(COMMAND.COM_QUIT)
-        await self.socket.send_packet(send_data, self.loop)
+        try:
+            await self.socket.send_packet(send_data, self.loop)
+        except (OSError, socket.error):
+            pass
         self.socket.close()
         self.socket = None
 
     async def autocommit(self, value: bool) -> None:
         ''' Set whether or not to commit after every execute() '''
+        self.autocommit_mode = bool(value)
         if value:
             q = "SET AUTOCOMMIT = 1"
         else:
@@ -136,21 +141,21 @@ class AsyncConnection(Connection):
             self.errorhandler(None, exc, value)
         return False
 
-    async def ping(self, reconnect: bool = True) -> bool | None:
+    async def ping(self, reconnect: bool = False) -> bool | None:
         ''' Check if the server is alive '''
         try:
             await self._execute_command(COMMAND.COM_PING, "")
+            pkt = await self.read_packet()
+            return pkt.is_ok_packet()
         except:
             if reconnect:
-                self._connect()
+                await self._connect()
+                await self._initialize()
                 return await self.ping(False)
             else:
                 exc, value, tb = sys.exc_info()
                 self.errorhandler(None, exc, value)
                 return
-
-        pkt = await self.read_packet()
-        return pkt.is_ok_packet()
 
     async def set_charset(self, charset: str) -> None:
         try:

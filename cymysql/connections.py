@@ -18,7 +18,7 @@ except ImportError:
 
 from cymysql.charset import charset_by_name, encoding_by_charset
 from cymysql.cursors import Cursor
-from cymysql.constants import CLIENT, COMMAND, SERVER_STATUS
+from cymysql.constants import CLIENT, COMMAND, CR, SERVER_STATUS
 from cymysql.converters import decoders, encoders, escape_item
 from cymysql.err import Warning, Error, \
      InterfaceError, DataError, DatabaseError, OperationalError, \
@@ -109,7 +109,9 @@ class Connection(object):
         del cursor
         del connection
 
-        if not issubclass(errorclass, Error):
+        if isinstance(errorvalue, (OSError, socket.error)):
+            raise OperationalError(CR.CR_SERVER_GONE_ERROR, f"MySQL server has gone away ({errorvalue!r})")
+        elif not issubclass(errorclass, Error):
             raise Error(errorclass, errorvalue)
         elif isinstance(errorvalue, errorclass):
             raise errorvalue
@@ -241,6 +243,7 @@ class Connection(object):
         self.connect_timeout = connect_timeout
         self.messages = []
         self._result = None
+        self.autocommit_mode = False
 
         self.sql_mode = sql_mode
         self.init_command = init_command
@@ -267,7 +270,10 @@ class Connection(object):
         if self.socket is None:
             return
         send_data = b'\x01\x00\x00\x00' + int2bytes(COMMAND.COM_QUIT)
-        self.socket.send_packet(send_data)
+        try:
+            self.socket.send_packet(send_data)
+        except (OSError, socket.error):
+            pass
         self.socket.close()
         self.socket = None
 
@@ -277,6 +283,7 @@ class Connection(object):
 
     def autocommit(self, value: bool) -> None:
         ''' Set whether or not to commit after every execute() '''
+        self.autocommit_mode = bool(value)
         if value:
             q = "SET AUTOCOMMIT = 1"
         else:
@@ -287,6 +294,9 @@ class Connection(object):
         except:
             exc, value, tb = sys.exc_info()
             self.errorhandler(None, exc, value)
+
+    def get_autocommit(self) -> bool:
+        return self.autocommit_mode
 
     def commit(self) -> None:
         ''' Commit changes to stable storage '''
@@ -368,21 +378,21 @@ class Connection(object):
             self.errorhandler(None, exc, value)
         return False
 
-    def ping(self, reconnect: bool = True) -> bool | None:
+    def ping(self, reconnect: bool = False) -> bool | None:
         ''' Check if the server is alive '''
         try:
             self._execute_command(COMMAND.COM_PING, "")
+            pkt = self.read_packet()
+            return pkt.is_ok_packet()
         except:
             if reconnect:
                 self._connect()
+                self._initialize()
                 return self.ping(False)
             else:
                 exc, value, tb = sys.exc_info()
                 self.errorhandler(None, exc, value)
                 return
-
-        pkt = self.read_packet()
-        return pkt.is_ok_packet()
 
     def set_charset(self, charset: str) -> None:
         try:
